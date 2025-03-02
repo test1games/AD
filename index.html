@@ -446,6 +446,13 @@
             // 发布成功后放礼花
             alert('曝光流量添加成功，正在增加曝光度。');
             createConfetti();
+            
+            // 滚动到新发布的广告位置
+            const firstCard = document.querySelector('.store-card');
+            if (firstCard) {
+                // 平滑滚动到第一个广告卡片
+                firstCard.scrollIntoView({ behavior: 'smooth' });
+            }
         });
 
         function exportData() {
