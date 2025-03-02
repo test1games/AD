@@ -338,6 +338,60 @@
                 font-size: 1.1rem; /* 在更小的屏幕上进一步缩小字体 */
             }
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--card-bg);
+            margin: 10% auto;
+            padding: 25px;
+            border-radius: 12px;
+            width: 300px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            transform: scale(0.7);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            color: var(--text-color);
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -401,6 +455,23 @@
                 <button type="button" class="btn btn-danger" onclick="importData()">导入数据</button>
             </div>
         </form>
+    </div>
+
+    <!-- 添加自定义登录模态框 -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeLoginModal()">&times;</span>
+            <h3 class="neon"><i class="fas fa-user-shield"></i> 管理员登录</h3>
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" id="username" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="password" placeholder="请输入密码">
+            </div>
+            <button class="btn btn-primary" onclick="validateLogin()">登录</button>
+        </div>
     </div>
 
     <script>
@@ -541,19 +612,63 @@
         }
 
         function showLogin() {
-            const username = prompt('请输入用户名');
-            if (username === null) return; // 用户取消
+            const modal = document.getElementById('loginModal');
+            modal.style.display = 'block';
             
-            const password = prompt('密码');
-            if (password === null) return; // 用户取消
+            // 使用setTimeout确保过渡动画正确触发
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+            
+            // 获取点击按钮的位置，作为动画起点
+            const loginBtn = document.querySelector('.btn.btn-primary.blink');
+            const rect = loginBtn.getBoundingClientRect();
+            const modalContent = document.querySelector('.modal-content');
+            
+            // 设置模态框初始位置为按钮位置
+            modalContent.style.transformOrigin = `${rect.left + rect.width/2}px ${rect.top}px`;
+        }
+
+        function closeLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.classList.remove('show');
+            
+            // 等待过渡动画完成后隐藏模态框
+            setTimeout(() => {
+                modal.style.display = 'none';
+                // 清空输入
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+            }, 300);
+        }
+
+        function validateLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
             
             if(username === 'qin' && password === 'aaa112233') {
+                closeLoginModal();
                 document.getElementById('adminPanel').style.display = 'block';
                 alert('登录成功');
             } else {
                 alert('登录失败');
             }
         }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                closeLoginModal();
+            }
+        };
+        
+        // 添加按键监听，用户按回车键时提交登录
+        document.getElementById('password').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                validateLogin();
+            }
+        });
 
         document.getElementById('storeForm').addEventListener('submit', (e) => {
             e.preventDefault();
