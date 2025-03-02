@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多彩店铺推广系统</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #dc143c;
+            --secondary-color: #eec643;
+            --danger-color: #ff0f7b;
+            --text-color: #f0f0f0;
+            --background-color: #0d0d0d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #232526, #414345);
+        }
+
+        .neon {
+            animation: neonGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes neonGlow {
+            0% {
+                text-shadow: 
+                    0 0 4px #ff00eb, 
+                    0 0 10px #ff00eb, 
+                    0 0 15px #ff00eb, 
+                    0 0 20px #ff00eb, 
+                    0 0 25px #ff00eb;
+            }
+            100% {
+                text-shadow: 
+                    0 0 4px #009fff, 
+                    0 0 10px #009fff, 
+                    0 0 15px #009fff, 
+                    0 0 20px #009fff, 
+                    0 0 25px #009fff;
+            }
+        }
+
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.4; }
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), #fa7c91);
+            color: white;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .store-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .store-card {
+            margin-bottom: 2rem;
+            position: relative;
+            transition: transform 0.3s ease;
+            animation: cardEntrance 0.5s ease;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .store-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .exposure-badge {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .admin-panel {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2.5rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            display: none;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            transition: box-shadow 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 6px rgba(255,0,219,0.4);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1 class="neon"><i class="fas fa-store"></i> 精品店铺推广平台</h1>
+        <div class="button-group">
+            <button class="btn btn-primary blink" onclick="showLogin()">
+                <i class="fas fa-user-shield"></i>
+                管理员登录
+            </button>
+        </div>
+    </nav>
+
+    <div class="store-container" id="storeContainer"></div>
+
+    <div class="admin-panel" id="adminPanel">
+        <h2 class="neon" style="margin-bottom: 2rem;">
+            <i class="fas fa-tools"></i> 店铺管理
+        </h2>
+        <form id="storeForm">
+            <div class="form-group">
+                <label>店铺名称</label>
+                <input type="text" id="storeName" required>
+            </div>
+            <div class="form-group">
+                <label>店铺地址</label>
+                <input type="text" id="storeAddress" required>
+            </div>
+            <div class="form-group">
+                <label>联系电话</label>
+                <input type="tel" id="storePhone" required>
+            </div>
+            <div class="form-group">
+                <label>营业时间</label>
+                <input type="text" id="businessHours" required>
+            </div>
+            <div class="form-group">
+                <label>店铺简介</label>
+                <textarea id="storeDesc" rows="4" required></textarea>
+            </div>
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary">发布广告</button>
+                <button type="button" class="btn btn-primary" onclick="exportData()">导出数据</button>
+                <button type="button" class="btn btn-danger" onclick="importData()">导入数据</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // 发布广告的广告卡片只使用这一种视觉样式
+        const templates = [
+            `<div class="content">
+                <div style="height: auto; padding: 25px; background-image: url(/g/bk/6.gif); text-align: center; border: 0px solid white;">
+                    <center>
+                        <div style="background-image: url(/g/a11.gif); background-color: rgb(255,255,255); line-height: 30px; padding: 1px; border: 3px solid rgb(255,222,173);">
+                            <div style="padding: 1px; border: 3px solid rgb(255,222,173);">
+                                <div style="padding: 1px; border: 2px solid rgb(255,222,173);">
+                                    <div style="padding: 1px; border: 1px solid rgb(255,222,173);">
+                                        <h2><span style="color: rgb(2, 92, 70);">{{name}}</span></h2>
+                                        <h2><font color="#025c46">{{description}}</font></h2>
+                                        <p>📍 {{address}}</p>
+                                        <p>📞 {{phone}}</p>
+                                        <p>🕒 {{hours}}</p>
+                                        {{exposure}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </center>
+                </div>
+            </div>`
+        ];
+
+        let stores = JSON.parse(localStorage.getItem('stores')) || [];
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function calculateExposure(store) {
+            const now = new Date();
+            const lastUpdate = new Date(store.lastExposureUpdate);
+            const elapsed = now - lastUpdate;
+            const intervals = Math.floor(elapsed / (5 * 60 * 1000));
+            if (intervals > 0) {
+                let increment = 0;
+                for (let i = 0; i < intervals; i++) {
+                    increment += getRandomInt(10, 50);
+                }
+                store.exposure += increment;
+                store.lastExposureUpdate = new Date(
+                    lastUpdate.getTime() + intervals * 5 * 60 * 1000
+                ).toISOString();
+            }
+            return store.exposure;
+        }
+
+        function renderStores() {
+            const container = document.getElementById('storeContainer');
+            container.innerHTML = '';
+            stores.forEach(store => {
+                const card = document.createElement('div');
+                card.className = 'store-card';
+                
+                const template = templates[0];
+                const currentExposure = calculateExposure(store);
+                const exposureHTML = `
+                    <div class="exposure-badge">
+                        <i class="fas fa-eye"></i>
+                        <span>${currentExposure}</span>
+                    </div>
+                `;
+
+                card.innerHTML = template
+                    .replace(/{{name}}/g, store.name)
+                    .replace(/{{address}}/g, store.address)
+                    .replace(/{{phone}}/g, store.phone)
+                    .replace(/{{hours}}/g, store.hours)
+                    .replace(/{{description}}/g, store.description)
+                    .replace(/{{exposure}}/g, exposureHTML);
+
+                container.appendChild(card);
+            });
+            localStorage.setItem('stores', JSON.stringify(stores));
+        }
+
+        function showLogin() {
+            const username = prompt('管理员账号：');
+            const password = prompt('管理员密码：');
+            if(username === 'admin' && password === 'admin123') {
+                document.getElementById('adminPanel').style.display = 'block';
+                alert('登录成功');
+            } else {
+                alert('登录失败');
+            }
+        }
+
+        document.getElementById('storeForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newStore = {
+                name: document.getElementById('storeName').value,
+                address: document.getElementById('storeAddress').value,
+                phone: document.getElementById('storePhone').value,
+                hours: document.getElementById('businessHours').value,
+                description: document.getElementById('storeDesc').value,
+                exposure: 0,
+                createdAt: new Date().toISOString(),
+                lastExposureUpdate: new Date().toISOString()
+            };
+
+            // 新广告排在前面
+            stores.unshift(newStore);
+            localStorage.setItem('stores', JSON.stringify(stores));
+            renderStores();
+            e.target.reset();
+            alert('曝光流量添加成功，正在增加曝光度。');
+        });
+
+        function exportData() {
+            const backupData = {
+                version: 1.2,
+                exportDate: new Date().toISOString(),
+                stores: stores
+            };
+            const dataStr = JSON.stringify(backupData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `stores-backup-${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            alert('导出成功');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (!data.stores || !Array.isArray(data.stores)) {
+                            throw new Error('无效的备份文件');
+                        }
+                        if (confirm('确定要覆盖当前数据吗？')) {
+                            stores = data.stores;
+                            localStorage.setItem('stores', JSON.stringify(stores));
+                            renderStores();
+                            alert('导入成功');
+                        }
+                    } catch (error) {
+                        alert(`导入失败：${error.message}`);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        window.onload = () => {
+            stores.forEach(store => calculateExposure(store));
+            localStorage.setItem('stores', JSON.stringify(stores));
+            renderStores();
+
+            // 每5分钟更新一次曝光度
+            setInterval(() => {
+                stores.forEach(store => {
+                    store.exposure += getRandomInt(10, 50);
+                    store.lastExposureUpdate = new Date().toISOString();
+                });
+                localStorage.setItem('stores', JSON.stringify(stores));
+                renderStores();
+            }, 5 * 60 * 1000);
+        };
+    </script>
+</body>
+</html>
