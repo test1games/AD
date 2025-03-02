@@ -233,6 +233,37 @@
                 opacity: 0;
             }
         }
+
+        /* 礼花效果的样式 */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f44336;
+            opacity: 0;
+            animation: fall 5s ease-out forwards;
+        }
+        
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(calc(100vh + 100px)) rotate(360deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -411,7 +442,10 @@
             localStorage.setItem('stores', JSON.stringify(stores));
             renderStores();
             e.target.reset();
+            
+            // 发布成功后放礼花
             alert('曝光流量添加成功，正在增加曝光度。');
+            createConfetti();
         });
 
         function exportData() {
@@ -459,6 +493,50 @@
                 reader.readAsText(file);
             };
             input.click();
+        }
+
+        // 添加礼花效果函数
+        function createConfetti() {
+            const confettiContainer = document.createElement('div');
+            confettiContainer.className = 'confetti-container';
+            document.body.appendChild(confettiContainer);
+            
+            const colors = ['#ff77b9', '#ffa3d6', '#ff97c2', '#ff72ec', '#ffb3ec', '#f5a9b8', '#ffc0cb', '#ffdfd3'];
+            
+            // 创建100个礼花片
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // 随机颜色
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // 随机形状（方形或圆形）
+                if (Math.random() > 0.5) {
+                    confetti.style.borderRadius = '50%';
+                }
+                
+                // 随机大小
+                const size = Math.random() * 15 + 5;
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                
+                // 随机位置
+                confetti.style.left = `${Math.random() * 100}%`;
+                
+                // 随机延迟
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                
+                // 随机动画持续时间
+                confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                
+                confettiContainer.appendChild(confetti);
+            }
+            
+            // 5秒后移除礼花容器
+            setTimeout(() => {
+                confettiContainer.remove();
+            }, 5000);
         }
 
         window.onload = () => {
