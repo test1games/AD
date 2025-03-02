@@ -7,11 +7,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #dc143c;
-            --secondary-color: #eec643;
-            --danger-color: #ff0f7b;
-            --text-color: #f0f0f0;
-            --background-color: #0d0d0d;
+            /* 适合按摩店推广的亮色系 */
+            --primary-color: #ff77b9;   /* 明亮粉色 */
+            --secondary-color: #ffa3d6; /* 更浅的粉色 */
+            --danger-color: #ff97c2;    /* 闪烁用 */
+            --text-color: #4a2d26;
+            --background-color: #ffe4ec; /* 明亮背景 */
         }
 
         * {
@@ -24,7 +25,7 @@
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             line-height: 1.6;
             color: var(--text-color);
-            background: linear-gradient(135deg, #232526, #414345);
+            background: linear-gradient(135deg, var(--background-color), #ffcce0);
         }
 
         .neon {
@@ -34,19 +35,19 @@
         @keyframes neonGlow {
             0% {
                 text-shadow: 
-                    0 0 4px #ff00eb, 
-                    0 0 10px #ff00eb, 
-                    0 0 15px #ff00eb, 
-                    0 0 20px #ff00eb, 
-                    0 0 25px #ff00eb;
+                    0 0 4px #ff72ec, 
+                    0 0 10px #ff72ec, 
+                    0 0 15px #ff72ec, 
+                    0 0 20px #ff72ec, 
+                    0 0 25px #ff72ec;
             }
             100% {
                 text-shadow: 
-                    0 0 4px #009fff, 
-                    0 0 10px #009fff, 
-                    0 0 15px #009fff, 
-                    0 0 20px #009fff, 
-                    0 0 25px #009fff;
+                    0 0 4px #ffb3ec, 
+                    0 0 10px #ffb3ec, 
+                    0 0 15px #ffb3ec, 
+                    0 0 20px #ffb3ec, 
+                    0 0 25px #ffb3ec;
             }
         }
 
@@ -59,8 +60,30 @@
             51%, 100% { opacity: 0.4; }
         }
 
+        .ad-neon {
+            animation: adNeonGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes adNeonGlow {
+            0% {
+                box-shadow: 0 0 6px #ff72ec, 0 0 12px #ff72ec;
+            }
+            100% {
+                box-shadow: 0 0 6px #ffb3ec, 0 0 12px #ffb3ec;
+            }
+        }
+
+        .ad-blink {
+            animation: adBlink 1.5s infinite;
+        }
+
+        @keyframes adBlink {
+            0%, 60% { opacity: 1; }
+            61%, 100% { opacity: 0.6; }
+        }
+
         .navbar {
-            background: linear-gradient(135deg, var(--primary-color), #fa7c91);
+            background: linear-gradient(135deg, var(--primary-color), #f785c8);
             color: white;
             padding: 1.2rem 2rem;
             display: flex;
@@ -110,15 +133,15 @@
             position: relative;
             transition: transform 0.3s ease;
             animation: cardEntrance 0.5s ease;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.2);
             border-radius: 12px;
             overflow: hidden;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.6);
         }
 
         .store-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         }
 
         @keyframes cardEntrance {
@@ -130,7 +153,7 @@
             position: absolute;
             bottom: 15px;
             right: 15px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.6);
             padding: 5px 15px;
             border-radius: 15px;
             display: flex;
@@ -145,7 +168,7 @@
             max-width: 800px;
             margin: 3rem auto;
             padding: 2.5rem;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.7);
             border-radius: 16px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.3);
             display: none;
@@ -168,6 +191,7 @@
             border-radius: 8px;
             margin-top: 0.5rem;
             transition: box-shadow 0.3s;
+            font-size: 1rem;
         }
 
         input:focus, textarea:focus {
@@ -179,6 +203,34 @@
             .navbar {
                 flex-direction: column;
                 gap: 1rem;
+            }
+        }
+
+        .floating-emoji-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .floating-emoji {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: floatEmoji 4s linear infinite;
+        }
+
+        @keyframes floatEmoji {
+            0% {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-200%);
+                opacity: 0;
             }
         }
     </style>
@@ -230,15 +282,34 @@
     </div>
 
     <script>
-        // 发布广告的广告卡片只使用这一种视觉样式
+        // 发布广告的广告卡片只使用这一种视觉样式 (加了霓虹/闪烁class)
+        const randomEmojis = ['😍', '😘', '❤'];
+        function createFloatingEmojis(container) {
+            const emojiCount = 3;
+            for (let i = 0; i < emojiCount; i++) {
+                const span = document.createElement('span');
+                span.className = 'floating-emoji';
+                const emoji = randomEmojis[Math.floor(Math.random() * randomEmojis.length)];
+                span.textContent = emoji;
+                // 如果是 ❤，设置为红色
+                if (emoji === '❤') {
+                    span.style.color = "red";
+                }
+                span.style.left = Math.random() * 80 + '%';
+                span.style.animationDelay = (Math.random() * 2) + 's';
+                container.appendChild(span);
+            }
+        }
+
         const templates = [
-            `<div class="content">
+            `<div class="content floating-emoji-container">
                 <div style="height: auto; padding: 25px; background-image: url(/g/bk/6.gif); text-align: center; border: 0px solid white;">
                     <center>
                         <div style="background-image: url(/g/a11.gif); background-color: rgb(255,255,255); line-height: 30px; padding: 1px; border: 3px solid rgb(255,222,173);">
                             <div style="padding: 1px; border: 3px solid rgb(255,222,173);">
                                 <div style="padding: 1px; border: 2px solid rgb(255,222,173);">
-                                    <div style="padding: 1px; border: 1px solid rgb(255,222,173);">
+                                    <!-- 最内层边框上添加霓虹、闪烁效果 -->
+                                    <div style="padding: 1px; border: 1px solid rgb(255,222,173);" class="ad-neon ad-blink">
                                         <h2><span style="color: rgb(2, 92, 70);">{{name}}</span></h2>
                                         <h2><font color="#025c46">{{description}}</font></h2>
                                         <p>📍 {{address}}</p>
@@ -303,6 +374,10 @@
                     .replace(/{{exposure}}/g, exposureHTML);
 
                 container.appendChild(card);
+
+                // 创建或添加随机飘动的表情
+                const floatingContainer = card.querySelector('.floating-emoji-container');
+                createFloatingEmojis(floatingContainer);
             });
             localStorage.setItem('stores', JSON.stringify(stores));
         }
