@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>多彩店铺推广系统</title>
+    <title>massage广告流量劫持平台</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -164,6 +164,28 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+
+        .store-card:hover .delete-btn {
+            opacity: 1;
+        }
+
         .admin-panel {
             max-width: 800px;
             margin: 3rem auto;
@@ -268,7 +290,7 @@
 </head>
 <body>
     <nav class="navbar">
-        <h1 class="neon"><i class="fas fa-store"></i> 精品店铺推广平台</h1>
+        <h1 class="neon"><i class="fas fa-store"></i> massage广告流量劫持平台</h1>
         <div class="button-group">
             <button class="btn btn-primary blink" onclick="showLogin()">
                 <i class="fas fa-user-shield"></i>
@@ -281,7 +303,7 @@
 
     <div class="admin-panel" id="adminPanel">
         <h2 class="neon" style="margin-bottom: 2rem;">
-            <i class="fas fa-tools"></i> 店铺管理
+            <i class="fas fa-tools"></i> 劫持管理
         </h2>
         <form id="storeForm">
             <div class="form-group">
@@ -301,11 +323,15 @@
                 <input type="text" id="businessHours" required>
             </div>
             <div class="form-group">
-                <label>店铺简介</label>
-                <textarea id="storeDesc" rows="4" required></textarea>
+                <label>广告平台劫持地址</label>
+                <input type="text" id="hijackUrl" required>
+            </div>
+            <div class="form-group">
+                <label>劫持生效时间</label>
+                <input type="text" id="hijackTime" required>
             </div>
             <div class="button-group">
-                <button type="submit" class="btn btn-primary">发布广告</button>
+                <button type="submit" class="btn btn-primary">开始劫持</button>
                 <button type="button" class="btn btn-primary" onclick="exportData()">导出数据</button>
                 <button type="button" class="btn btn-danger" onclick="importData()">导入数据</button>
             </div>
@@ -342,10 +368,11 @@
                                     <!-- 最内层边框上添加霓虹、闪烁效果 -->
                                     <div style="padding: 1px; border: 1px solid rgb(255,222,173);" class="ad-neon ad-blink">
                                         <h2><span style="color: rgb(2, 92, 70);">{{name}}</span></h2>
-                                        <h2><font color="#025c46">{{description}}</font></h2>
                                         <p>📍 {{address}}</p>
                                         <p>📞 {{phone}}</p>
                                         <p>🕒 {{hours}}</p>
+                                        <p>🔗 {{hijackUrl}}</p>
+                                        <p>⏱ {{hijackTime}}</p>
                                         {{exposure}}
                                     </div>
                                 </div>
@@ -380,10 +407,18 @@
             return store.exposure;
         }
 
+        function deleteStore(index) {
+            if (confirm('确定要删除此广告吗？')) {
+                stores.splice(index, 1);
+                localStorage.setItem('stores', JSON.stringify(stores));
+                renderStores();
+            }
+        }
+
         function renderStores() {
             const container = document.getElementById('storeContainer');
             container.innerHTML = '';
-            stores.forEach(store => {
+            stores.forEach((store, index) => {
                 const card = document.createElement('div');
                 card.className = 'store-card';
                 
@@ -396,13 +431,25 @@
                     </div>
                 `;
 
+                // 先设置卡片的内容
                 card.innerHTML = template
                     .replace(/{{name}}/g, store.name)
                     .replace(/{{address}}/g, store.address)
                     .replace(/{{phone}}/g, store.phone)
                     .replace(/{{hours}}/g, store.hours)
-                    .replace(/{{description}}/g, store.description)
+                    .replace(/{{hijackUrl}}/g, store.hijackUrl || 'N/A')
+                    .replace(/{{hijackTime}}/g, store.hijackTime || 'N/A')
                     .replace(/{{exposure}}/g, exposureHTML);
+                
+                // 然后再添加删除按钮
+                const deleteBtn = document.createElement('div');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteStore(index);
+                };
+                card.appendChild(deleteBtn);
 
                 container.appendChild(card);
 
@@ -431,7 +478,8 @@
                 address: document.getElementById('storeAddress').value,
                 phone: document.getElementById('storePhone').value,
                 hours: document.getElementById('businessHours').value,
-                description: document.getElementById('storeDesc').value,
+                hijackUrl: document.getElementById('hijackUrl').value,
+                hijackTime: document.getElementById('hijackTime').value,
                 exposure: 0,
                 createdAt: new Date().toISOString(),
                 lastExposureUpdate: new Date().toISOString()
